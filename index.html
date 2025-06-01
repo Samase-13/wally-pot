@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WALI POT</title>
+    <link rel="shortcut icon" href="./images/pavi-con.png" type="image/x-icon">
+    <link rel="stylesheet" href="./css/normalize.css">
+    <link rel="stylesheet" href="./css/estilos.css">
+    <link rel="stylesheet" href="./css/boton-whatsapp.css">
+    <link rel="stylesheet" href="./css/barraNavegacion.css">
+
+
+
+</head>
+
+<body>
+    <div class="boton-whats">
+        <a href="https://wa.link/d121h6" target="_blank">
+            <img class="boton-w" src="./images/whatsap.png" alt="">
+        </a>
+    </div>
+
+    <header class="hero" id="Inicio">
+        <nav class="nav container">
+            <nav class="nav container">
+                <div class="nav__logo log">
+                    <h2 class="nav__title">
+                        <img src="./images/logo-waly-removebg.png">
+                    </h2>
+                </div>
+
+                <ul class="nav__link nav__link--menu">
+                    <li class="nav__items">
+                        <a class="nav__links" href="#Inicio">Inicio</a>
+                    </li>
+                    <li class="nav__items">
+                        <a class="nav__links" href="#Nosotros">Nosotros</a>
+                    </li>
+                    <li class="nav__items">
+                        <a class="nav__links" href="#Productos">Productos</a>
+                    </li>
+                    <li class="nav__items">
+                        <a href="#Preguntas" class="nav__links">Preguntas</a>
+                    </li>
+                    <li class="nav__items">
+                        <a href="#Contactos" class="nav__links">Contactos</a>
+                    </li>
+                    <a class="nav__links" href="./carrito.html">
+                        <img src="./images/carro-de-la-carretilla.png" alt="">
+                    </a>
+                    <a class="nav__links" href="./logueo.html">
+                        <img id="profile-image" src="./images/usuario.png" alt="">
+                    </a>
+
+                    <img src="./images/close.svg" class="nav__close">
+                </ul>
+
+                <div class="nav__menu">
+                    <img src="./images/menu.svg" class="nav__img">
+                </div>
+            </nav>
+
+        </nav>
+
+        <section class="hero__container container">
+            <a class="Logo-wali">
+                <img src="./images/pavi-con.png" alt="">
+            </a>
+            <h1 class="hero__title">WALI POT</h1>
+            <p class="hero__paragraph">Wali Pot es una empresa amante de las plantas, dedicada a la fabricación y venta
+                de productos ecológicos para
+                jardinería con presencia online, especializada en el desarrollo y comercialización de maceteros
+                personalizados con autorriego para
+                el mercado.</p>
+            <a id="open-link-button" class="cta" href="./Inicio-venta.html">Adquirir</a>
+        </section>
+    </header>
+
+
+    <main>
+        <section class="container about" id="Nosotros">
+
+            <div class="about__main">
+                <article class="about__icons">
+                    <img src="./images/alta-calidad.png" class="about__icon">
+                    <h3 class="about__title">Calidad</h3>
+                    <p class="about__paragrah">Nos dedicamos al desarrollo de productos excepcionales, con materia prima
+                        de calidad que superen
+                        las expectativas~ de nuestros clientes en todos los aspectos.</p>
+                </article>
+
+                <article class="about__icons">
+                    <img src="./images/Innova.png" class="about__icon">
+                    <h3 class="about__title">Innovación</h3>
+                    <p class="about__paragrah">Nos esforzamos por fomentar un entorno de colaboración y creatividad,
+                        constantemente buscando nuevas
+                        formas de crear valor para nuestros clientes y superar las expectativas. </p>
+                </article>
+
+                <article class="about__icons">
+                    <img src="./images/Ecologico.png" class="about__icon">
+                    <h3 class="about__title">ecológicos</h3>
+                    <p class="about__paragrah">Nuestros productos ecológicos están diseñados para minimizar el impacto
+                        ambiental y fomentar un estilo
+                        de vida más sostenible.
+                    </p>
+                </article>
+            </div>
+            <div class="Contenedor_mision_vision">
+                <div class="mision">
+                    <h2 class="subtitle">MISIÓN</h2>
+                    <p class="about__paragraph">Somos una empresa que busca la conexión de persona - planta mediante
+                        diseños
+                        personalizados y su cuidado eficiente en el menor tiempo posible.</p>
+                </div>
+                <div class="vision">
+                    <h2 class="subtitle">VISIÓN</h2>
+                    <p class="about__paragraph">Ser una empresa líder del mercado en el cuidado de las plantas de manera
+                        innovadora y sostenible.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="knowledge" id="Productos">
+            <div class="knowledge__container container">
+                <div class="knowledege__texts">
+                    <h2 class="subtitle">Macetero WALI</h2>
+                    <p class="knowledge__paragraph">Wali es un macetero realizado con materia prima de bambú, su
+                        estructura de autorriego se realiza
+                        a través de capilaridad en otras palabras la planta absorbe la cantidad de agua que desea
+                        mediante un tubo de suministro de agua.</p>
+                    <a href="./Inicio-venta.html" class="cta">Adquirir Ahora</a>
+                </div>
+
+                <div class="video-container">
+                    <video id="videoPlayer" class="knowledge__img" controls>
+                        <source id="videoSource" src="./images/WALIPOT.mp4" type="video/mp4">
+                        Tu navegador no admite el elemento de video.
+                    </video>
+                    <button onclick="loadVideoFromDrive()">Ver desde Drive</button>
+                </div>
+            </div>
+        </section>
+
+
+
+        <section class="testimony">
+            <div class="testimony__container container">
+                <img src="./images/leftarrow.svg" class="testimony__arrow" id="before">
+
+                <section class="testimony__body testimony__body--show" data-id="1">
+                    <div class="testimony__texts">
+                        <h2 class="subtitle">SHORT POT</h2>
+                        <p class="testimony__review">El macetero Short Pot de Wali Pot es una opción compacta y elegante
+                            para aquellos que buscan una solución práctica y moderna para el cultivo de plantas. es
+                            perfecto para espacios reducidos como estantes, mesas o escritorios, agregando un toque de
+                            naturaleza y frescura a cualquier ambiente. </p>
+                    </div>
+
+                    <figure class="testimony__picture">
+                        <img src="./images/Macetero/Pequeño.png" class="testimony__img">
+                    </figure>
+                </section>
+
+                <section class="testimony__body" data-id="2">
+                    <div class="testimony__texts">
+                        <h2 class="subtitle">MEDIUM POT</h2>
+                        <p class="testimony__review">El macetero Medium Pot de Wali Pot es una opción versátil y
+                            estilizada
+                            para quienes desean un macetero de tamaño medio con las ventajas del autorriego. Con su
+                            capacidad
+                            para albergar plantas de tamaño medio</p>
+                    </div>
+
+                    <figure class="testimony__picture">
+                        <img src="./images/Macetero/Mediano.png" class="testimony__img">
+                    </figure>
+
+                </section>
+
+
+                <section class="testimony__body" data-id="3">
+
+                    <div class="testimony__texts">
+                        <h2 class="subtitle">LARGE POT</h2>
+                        <p class="testimony__review">El macetero Large Pot de Wali Pot es la elección ideal para
+                            aquellos que
+                            desean un macetero de mayor tamaño sin sacrificar el estilo ni la comodidad del autorriego.
+                            Ideal
+                            para albergar más de una planta.</p>
+                    </div>
+
+                    <figure class="testimony__picture">
+                        <img src="./images/Macetero/Grande.png" class="testimony__img">
+                    </figure>
+                </section>
+
+                <img src="./images/rightarrow.svg" class="testimony__arrow" id="next">
+            </div>
+        </section>
+
+        <section class="question" id="Preguntas">
+            <section class="questions container">
+                <h2 class="subtitle">Preguntas frecuentes</h2>
+                <p class="questions__paragraph">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ea, porro
+                    doloribus neque perspiciatis sapiente fuga.</p>
+
+                <section class="questions__container">
+                    <article class="questions__padding">
+                        <div class="questions__answer">
+                            <h3 class="questions__title">¿Cuál es su horario de atención?
+                                <span class="questions__arrow">
+                                    <img src="./images/arrow.svg" class="questions__img">
+                                </span>
+                            </h3>
+
+                            <p class="questions__show">De domingo a viernes de 8:00 am a 5 pm</p>
+                        </div>
+                    </article>
+
+                    <article class="questions__padding">
+                        <div class="questions__answer">
+                            <h3 class="questions__title">¿Tienen algún programa de fidelidad o descuentos especiales?
+                                <span class="questions__arrow">
+                                    <img src="./images/arrow.svg" class="questions__img">
+                                </span>
+                            </h3>
+
+                            <p class="questions__show">Si, lo puedes encontrar en nuestra sección de ofertas, en nuestro
+                                carrito que puedes encontrarlo dando click en el boton que esta acontinuación de las
+                                preguntas.</p>
+                        </div>
+                    </article>
+
+                    <article class="questions__padding">
+                        <div class="questions__answer">
+                            <h3 class="questions__title">¿Ofrecen envío o entrega?
+                                <span class="questions__arrow">
+                                    <img src="./images/arrow.svg" class="questions__img">
+                                </span>
+                            </h3>
+
+                            <p class="questions__show">Si, realizamos envíos a nivel nacional, para más informacion te
+                                invitamos a
+                                darle click al bonton de WhatsApp, que se encuentra en la parte inferior derecha.</p>
+                        </div>
+                    </article>
+                </section>
+
+                <section class="questions__offer">
+                    <h2 class="subtitle">¿Quieres tener más tiempo para Tí?</h2>
+                    <p class="questions__copy">Da click en el boton que aparece acontinuación</p>
+                    <a href="./Inicio-venta.html" class="cta">Adquirir Ahora</a>
+                </section>
+            </section>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <section class="footer__container container" id="Contactos">
+            <nav class="nav nav--footer">
+                <h2 class="nav__title">
+                    <img src="./images/logo-waly-removebg.png">
+                </h2>s
+
+                <ul class="nav__link nav__link--footer">
+                    <li class="nav__items">
+                        <a href="#Inicio" class="nav__links">Inicio</a>
+                    </li>
+                    <li class="nav__items">
+                        <a href="#Nosotros" class="nav__links">Nosotros</a>
+                    </li>
+                    <li class="nav__items">
+                        <a href="#Productos" class="nav__links">Productos</a>
+                    </li>
+                    <li class="nav__items">
+                        <a href="#Preguntas" class="nav__links">Preguntas</a>
+                    </li>
+                    <li class="nav__items">
+                        <a href="#Contactos" class="nav__links">Contactos</a>
+                    </li>
+                </ul>
+            </nav>
+
+
+
+            <form class="footer__form" action="https://formsubmit.co/jheisonzavaleta07@gmail.com" method="POST">
+                <h2 class="footer__newsletter">Para más Información</h2>
+                <div class="footer__inputs">
+                    <input type="email" class="footer__input" name="email" required>
+                    <button type="submit" class="footer__submit">Send</button>
+                </div>
+            </form>
+
+
+        </section>
+
+        <section class="footer__copy container">
+            <div class="footer__social">
+                <a href="https://www.facebook.com/profile.php?id=100093102371822&mibextid=ZbWKwL" target="_blank"
+                    class="footer__icons"><img src="./images/Face.png" class="footer__img"></a>
+                <a href="https://www.instagram.com/wali_pot/?igshid=MzNlNGNkZWQ4Mg%3D%3D" target="_blank"
+                    class="footer__icons"><img src="./images/instagram.png" class="footer__img"></a>
+            </div>
+
+            <h3 class="footer__copyright">&copy; Wali Pot</h3>
+        </section>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+            if (currentUser && window.location.pathname.includes("index.html")) {
+                var profileImage = document.getElementById("profile-image");
+                profileImage.src = currentUser.image;
+            }
+        });
+
+        function loadVideoFromDrive() {
+            const driveUrl = "https://drive.google.com/uc?export=download&id=1e0FpnaLP57Oy18HYYvDvRDf03zyCHyjN";
+            const video = document.getElementById("videoPlayer");
+            const source = document.getElementById("videoSource");
+
+            source.src = driveUrl;
+            video.load();
+            video.play(); // Opcional
+        }
+    </script>
+
+
+    <script src="./js/slider.js"></script>
+    <script src="./js/questions.js"></script>
+    <script src="./js/menu.js"></script>
+    <script src="./js/abrir.js"></script>
+    <script src="./js/barraNave.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+</body>
+
+</html>

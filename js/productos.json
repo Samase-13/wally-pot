@@ -1,0 +1,244 @@
+[
+    {
+        "id": "MaceteroPequeño",
+        "titulo": "SHORT POT",
+        "imagen": "./images/macetero/Pequeño.png",
+        "Descripcion": "El macetero Short Pot de Wali Pot es una opción compacta y elegante para aquellos que buscan una solución práctica y moderna para el cultivo de plantas. es perfecto para espacios reducidos como estantes, mesas o escritorios, agregando un toque de naturaleza y frescura a cualquier ambiente.",
+        "categoria": {
+            "nombre": "Macetero",
+            "id": "abrigos"
+        },
+        "precio": 10
+    },
+    {
+        "id": "MaceteroMediano",
+        "titulo": "MEDIUM POT",
+        "imagen": "./images/macetero/Mediano.png",
+        "Descripcion": "El macetero Medium Pot de Wali Pot es una opción versátil y estilizada para quienes desean un macetero de tamaño medio con las ventajas del autorriego. Con su capacidad para albergar plantas de tamaño medio",
+        "categoria": {
+            "nombre": "Macetero",
+            "id": "abrigos"
+        },
+        "precio": 18
+    },
+    {
+        "id": "MaceteroGrande",
+        "titulo": "LARGE POT",
+        "imagen": "./images/macetero/Grande.png",
+        "Descripcion": "El macetero Large Pot de Wali Pot es la elección ideal para aquellos que desean un macetero de mayor tamaño sin sacrificar el estilo ni la comodidad del autorriego. Ideal para albergar más de una planta.",
+        "categoria": {
+            "nombre": "Macetero",
+            "id": "abrigos"
+        },
+        "precio": 23
+    },
+    {
+        "id": "planta1",
+        "titulo": "Haworthia",
+        "imagen": "./images/plantas-abono/1.jpg",
+        "Descripcion": "Haworthia y Haworthiopsis attenuata son dos nombres comunes para referirse a la misma planta suculenta perteneciente a la familia de las Xanthorrhoeaceae. También se le conoce como planta de jade zebra debido a sus hojas gruesas y rayas blancas características.",
+        "categoria": {
+            "nombre": "Planta",
+            "id": "camisetas"
+        },
+        "precio": 10
+    },
+    {
+        "id": "planta2",
+        "titulo": "Crassula ",
+        "imagen": "./images/plantas-abono/2.jpg",
+        "Descripcion": "La Crassula marnieriana, comúnmente conocida como planta de collar o colgante, es una planta suculenta perteneciente a la familia Crassulaceae. Es originaria de la región del Cabo en Sudáfrica.",
+        "categoria": {
+            "nombre": "Planta",
+            "id": "camisetas"
+        },
+        "precio": 7
+    },
+    {
+        "id": "planta3",
+        "titulo": "Opuntia ",
+        "imagen": "./images/plantas-abono/3.jpg",
+        "Descripcion": "La Opuntia microdasys, conocida comúnmente como planta de orejas de conejo o nopales de oro, es una especie de cactus perteneciente a la familia Cactaceae. Es originaria de México y se ha popularizado en muchas otras regiones debido a su apariencia llamativa y su facilidad de cultivo.",
+        "categoria": {
+            "nombre": "planta",
+            "id": "camisetas"
+        },
+        "precio": 7
+    },
+    {
+        "id": "planta4",
+        "titulo": "Echeveria",
+        "imagen": "./images/plantas-abono/4.jpg",
+        "Descripcion": "La Echeveria es un género de plantas suculentas perteneciente a la familia Crassulaceae. Son originarias de América Central y América del Sur, pero se han vuelto muy populares en todo el mundo debido a su atractiva apariencia y facilidad de cultivo.",
+        "categoria": {
+            "nombre": "planta",
+            "id": "camisetas"
+        },
+        "precio": 5
+    },
+    {
+        "id": "planta5",
+        "titulo": "Euphorbia ",
+        "imagen": "./images/plantas-abono/5.jpg",
+        "Descripcion": "La Euphorbia virosa, también conocida como garambullo o candelilla, es una especie de planta suculenta perteneciente a la familia Euphorbiaceae. Es nativa del desierto de Sonora en México y del suroeste de los Estados Unidos.",
+        "categoria": {
+            "nombre": "planta",
+            "id": "camisetas"
+        },
+        "precio": 7
+    },
+    {
+        "id": "planta6",
+        "titulo": "Sedum ",
+        "imagen": "./images/plantas-abono/6.jpg",
+        "Descripcion": "El Sedum pachyphyllum, comúnmente conocido como planta de jadín o planta de piedra, es una suculenta perteneciente a la familia Crassulaceae. Es nativa de México y se ha vuelto popular en todo el mundo como planta de interior debido a su atractivo aspecto y facilidad de cultivo.",
+        "categoria": {
+            "nombre": "planta",
+            "id": "camisetas"
+        },
+        "precio": 5
+    },
+    {
+        "id": "planta7",
+        "titulo": "Micranthocereus",
+        "imagen": "./images/plantas-abono/7.jpeg",
+        "Descripcion": "El Micranthocereus es un género de cactus perteneciente a la familia Cactaceae. Este género comprende varias especies de cactus columnares originarios de América del Sur, especialmente de Brasil y Argentina.",
+        "categoria": {
+            "nombre": "planta",
+            "id": "camisetas"
+        },
+        "precio": 12
+    },
+    {
+        "id": "planta8",
+        "titulo": "Cereus",
+        "imagen": "./images/plantas-abono/8.jpeg",
+        "Descripcion": "El Cereus es un género de cactus perteneciente a la familia Cactaceae. Este género comprende varias especies de cactus columnares que se encuentran principalmente en América Central y América del Sur, aunque algunas también se han naturalizado en otras partes del mundo.",
+        "categoria": {
+            "nombre": "planta",
+            "id": "camisetas"
+        },
+        "precio": 10
+    },
+    {
+        "id": "planta9",
+        "titulo": "Haworthia",
+        "imagen": "./images/plantas-abono/9.jpeg",
+        "Descripcion": "Haworthia retusa es una especie de planta suculenta perteneciente a la familia Asphodelaceae. Es originaria de Sudáfrica y se ha vuelto popular en todo el mundo como planta de interior debido a su aspecto atractivo y su fácil cuidado.",
+        "categoria": {
+            "nombre": "planta",
+            "id": "camisetas"
+        },
+        "precio": 10
+    },
+    {
+        "id": "planta10",
+        "titulo": "Cotyledon",
+        "imagen": "./images/plantas-abono/10.jpeg",
+        "Descripcion": "Cotyledon tomentosa, también conocida como planta panda o planta orejas de gato, es una suculenta perteneciente a la familia Crassulaceae. Es originaria de Sudáfrica y se ha vuelto popular en muchos lugares como planta de interior debido a su atractiva apariencia y su fácil cuidado.",
+        "categoria": {
+            "nombre": "planta",
+            "id": "camisetas"
+        },
+        "precio": 12
+    },
+    {
+        "id": "planta11",
+        "titulo": "Kalanchoe",
+        "imagen": "./images/plantas-abono/11.jpg",
+        "Descripcion": "Kalanchoe es un género de plantas suculentas perteneciente a la familia Crassulaceae. Estas plantas son originarias de regiones tropicales y subtropicales de África, Madagascar y Asia, aunque también se han propagado en muchas otras partes del mundo debido a su atractivo ornamental y su fácil cultivo.",
+        "categoria": {
+            "nombre": "planta",
+            "id": "camisetas"
+        },
+        "precio": 5
+    },
+    {
+        "id": "planta12",
+        "titulo": "Portulacaria",
+        "imagen": "./images/plantas-abono/12.jpeg",
+        "Descripcion": "Portulacaria afra, comúnmente conocida como Jade o Planta de dinero, es una planta suculenta perteneciente a la familia Didiereaceae. Es originaria de Sudáfrica, específicamente de las regiones secas y semiáridas de la provincia de Eastern Cape y de KwaZulu-Natal.",
+        "categoria": {
+            "nombre": "planta",
+            "id": "camisetas"
+        },
+        "precio": 10
+    },
+    {
+        "id": "planta13",
+        "titulo": "Kalanchoe",
+        "imagen": "./images/plantas-abono/13.png",
+        "Descripcion": "Kalanchoe thyrsiflora, también conocida como planta panda o planta de hojas de remo, es una suculenta perenne perteneciente a la familia Crassulaceae. Es originaria de Sudáfrica y se ha vuelto popular en muchos lugares del mundo como planta ornamental.",
+        "categoria": {
+            "nombre": "planta",
+            "id": "camisetas"
+        },
+        "precio": 4
+    },
+    {
+        "id": "planta14",
+        "titulo": "Mammillaria",
+        "imagen": "./images/plantas-abono/14.jpeg",
+        "Descripcion": "",
+        "categoria": {
+            "nombre": "planta",
+            "id": "camisetas"
+        },
+        "precio": 8
+    },
+    {
+        "id": "abono",
+        "titulo": "Abono 250gr",
+        "imagen": "./images/plantas-abono/abono.jpeg",
+        "Descripcion": "Mammillaria gracilis es una especie de cactus perteneciente a la familia Cactaceae. Es originaria de México y se ha convertido en una planta popular en colecciones de cactus y suculentas debido a su aspecto atractivo y su fácil cuidado.",
+        "categoria": {
+            "nombre": "abono",
+            "id": "camisetas"
+        },
+        "precio": 4
+    },
+    {
+        "id": "oferta-01",
+        "titulo": "Oferta 1",
+        "imagen": "./images/Ofertas/1.jpeg",
+        "Descripcion": "La oferta 1 esta conformado por y large pot, tripctico(el cual te ayudara a cuidar de una mejor manera tu planta) y un abono organico.",
+        "categoria": {
+            "nombre": "oferta",
+            "id": "pantalones"
+        },
+        "precio": 25
+    },
+    {
+        "id": "oferta-02",
+        "titulo": "oferta 2",
+        "imagen": "./images/Ofertas/2.jpeg",
+        "Descripcion": "La oferta 2 esta conformada por 2 short pot y un triptico(el cual te ayudara a cuidar de una mejor manera tu planta).",
+        "categoria": {
+            "nombre": "oferta",
+            "id": "pantalones"
+        },
+        "precio": 20
+    },
+    {
+        "id": "oferta-03",
+        "titulo": "oferta 3",
+        "imagen": "./images/Ofertas/3.jpeg",
+        "Descripcion": "La oferta 3 esta conformada por un medium pot y un tiptico el cual te ayudara a cuidar de una mejor manera tu planta.",
+        "categoria": {
+            "nombre": "oferta",
+            "id": "pantalones"
+        },
+        "precio": 18
+    },
+    {
+        "id": "oferta-04",
+        "titulo": "Oferta 4",
+        "imagen": "./images/Ofertas/4.jpeg",
+        "Descripcion": "Oferta 2 esta conformada por 3 Wali Pot(las tres presentaciones) y un  abono de 250 gr para tus plantas.",
+        "categoria": {
+            "nombre": "oferta",
+            "id": "pantalones"
+        },
+        "precio": 51
+    }
+]
