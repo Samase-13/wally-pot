@@ -2,13 +2,13 @@ pipeline {
     agent any
 
     environment {
-        // VERIFICACION: Tu credencial de SonarQube en Jenkins con el token
-        SONAR_TOKEN_CRED_ID = 'sonarqube' // Mantenemos el ID de la credencial aquí
-        // VERIFICACION: URL de tu SonarQube.
-        // CAMBIADO: Asume que Jenkins y SonarQube están en la misma red Docker y SonarQube se llama 'sonarqube'.
-        // Si tu contenedor SonarQube tiene otro nombre en la red Docker, cámbialo aquí.
-        // Si usas 'docker.sonar:9000' y estás seguro que es accesible, puedes revertir.
-        SONAR_HOST_URL = 'http://sonarqube:9000'
+        // ID de la credencial de Jenkins que contiene tu token de SonarQube
+        SONAR_TOKEN_CRED_ID = 'sonarqube'
+
+        // URL de tu SonarQube, accediendo a través del host Docker.
+        // Esto es para Docker Desktop donde SonarQube corre en un contenedor
+        // y está mapeado al puerto 9000 de tu localhost.
+        SONAR_HOST_URL = 'http://host.docker.internal:9000'
     }
 
     stages {
@@ -42,12 +42,10 @@ pipeline {
                 script {
                     echo "Verificando configuración de SonarQube..."
                     echo "SONAR_HOST_URL (desde environment): ${env.SONAR_HOST_URL}"
-                    // No imprimimos el token directamente. withSonarQubeEnv lo maneja.
 
                     echo "Verificando conectividad con SonarQube en ${env.SONAR_HOST_URL}:"
-                    // Usamos env.SONAR_HOST_URL para asegurar que estamos usando el valor del bloque environment
                     sh """
-                        curl -sf --connect-timeout 10 ${env.SONAR_HOST_URL}/api/system/status || echo "⚠ No se puede conectar a SonarQube en ${env.SONAR_HOST_URL}. Verifica la red y que SonarQube esté completamente iniciado."
+                        curl -sf --connect-timeout 15 ${env.SONAR_HOST_URL}/api/system/status || echo "⚠ No se puede conectar a SonarQube en ${env.SONAR_HOST_URL}. Verifica que SonarQube esté completamente iniciado y accesible en localhost:9000 desde tu host."
                     """
 
                     echo "Verificando archivo sonar-project.properties:"
@@ -59,18 +57,12 @@ pipeline {
                     echo "Scanner Home: ${scannerHome}"
                     sh "test -f ${scannerHome}/bin/sonar-scanner && echo '✅ Scanner ejecutable encontrado' || echo '❌ Scanner NO encontrado.'"
 
-                    // 'sonarqube' es el nombre de tu servidor SonarQube configurado en Jenkins (Manage Jenkins -> Configure System)
-                    // y también el ID de la credencial que contiene el token.
+                    // 'sonarqube' (o el valor de SONAR_TOKEN_CRED_ID) es el ID de la credencial que contiene el token,
+                    // y también el nombre del servidor SonarQube configurado en Jenkins (Manage Jenkins -> Configure System) si los hiciste coincidir.
                     withSonarQubeEnv(env.SONAR_TOKEN_CRED_ID) {
                         echo "Ejecutando análisis de SonarQube..."
-                        echo "SonarQube environment variables inyectadas. SONAR_HOST_URL debería ser: ${SONAR_HOST_URL}, SONAR_TOKEN debería estar disponible para el scanner."
+                        echo "SonarQube environment variables inyectadas. SONAR_HOST_URL (para el scanner) debería ser: ${SONAR_HOST_URL}, SONAR_TOKEN debería estar disponible para el scanner."
 
-                        // El scanner leerá sonar.projectKey, sonar.projectName, sonar.sources, etc., de sonar-project.properties.
-                        // withSonarQubeEnv establece SONAR_HOST_URL y SONAR_TOKEN como variables de entorno,
-                        // por lo que el scanner debería recogerlas si no se anulan con -D.
-                        // Si aún necesitas pasar explícitamente la URL (a veces necesario si la variable de entorno no la toma bien el scanner):
-                        // -Dsonar.host.url=${env.SONAR_HOST_URL} \
-                        // Quitamos -Dsonar.login=${SONAR_TOKEN} porque withSonarQubeEnv lo debe gestionar.
                         sh """
                             echo "Listando archivos en el directorio actual antes del análisis:"
                             find . -type f -print | head -30
@@ -79,13 +71,8 @@ pipeline {
                             ${scannerHome}/bin/sonar-scanner \
                                 -Dsonar.host.url=${env.SONAR_HOST_URL} \
                                 -Dsonar.verbose=true \
-                                -X 
+                                -X
                         """
-                        // Si el scanner no toma SONAR_TOKEN automáticamente, podrías necesitar añadir:
-                        // -Dsonar.login=${SONAR_TOKEN} // Pero esto podría traer de vuelta la advertencia de seguridad.
-                        // Es mejor asegurarse que withSonarQubeEnv y la configuración del servidor SonarQube en Jenkins
-                        // estén configurados para que el token se inyecte correctamente.
-
                         echo "✅ Comando de análisis de SonarQube ejecutado."
                     }
                 }
@@ -98,7 +85,7 @@ pipeline {
                 echo "=== VERIFICANDO QUALITY GATE ==="
                 timeout(time: 10, unit: 'MINUTES') {
                     script {
-                        // 'sonarqube' es el nombre de tu servidor SonarQube configurado en Jenkins
+                        // 'sonarqube' (o el valor de SONAR_TOKEN_CRED_ID) debe ser el nombre de tu servidor SonarQube configurado en Jenkins
                         def qg = waitForQualityGate()
                         echo "Quality Gate Status: ${qg.status}"
                         if (qg.status != 'OK') {
