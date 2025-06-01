@@ -1,14 +1,17 @@
 pipeline {
     agent any
 
+    // No necesitamos 'tools { nodejs ... }' porque wally-pot no es un proyecto Node.js
+
     environment {
         // ID de la credencial de Jenkins que contiene tu token de SonarQube
-        SONAR_TOKEN_CRED_ID = 'sonarqube'
+        SONAR_TOKEN_CRED_ID = 'sonarqube' // Asegúrate que este es el ID correcto de tu credencial
 
-        // URL de tu SonarQube, accediendo a través del host Docker.
-        // Esto es para Docker Desktop donde SonarQube corre en un contenedor
-        // y está mapeado al puerto 9000 de tu localhost.
-        SONAR_HOST_URL = 'http://host.docker.internal:9000'
+        // URL de SonarQube. Elige UNA de estas y comenta la otra:
+        // Opción 1: Si tienes una red Docker personalizada y SonarQube se llama 'sonarqube' en esa red
+        SONAR_HOST_URL = 'http://sonarqube:9000'
+        // Opción 2: Si usas Docker Desktop y SonarQube está en localhost:9000 del host
+        // SONAR_HOST_URL = 'http://host.docker.internal:9000'
     }
 
     stages {
@@ -18,8 +21,8 @@ pipeline {
                 echo "Workspace: ${WORKSPACE}"
                 echo "Working directory:"
                 sh 'pwd'
-                echo "Contenido del directorio actual:"
-                sh 'ls -la'
+                echo "Contenido del directorio actual (primeros 30 archivos/carpetas):"
+                sh 'ls -la | head -n 30'
                 echo "=== FIN VERIFICACION ENTORNO ==="
             }
         }
@@ -28,52 +31,61 @@ pipeline {
             steps {
                 echo "=== INICIANDO CHECKOUT ==="
                 checkout scm
-                echo "Checkout completado. Verificando archivos descargados:"
-                sh 'ls -la'
-                echo "Verificando que sonar-project.properties existe:"
-                sh 'test -f sonar-project.properties && cat sonar-project.properties || echo "ERROR: sonar-project.properties no encontrado. Este archivo es crucial."'
+                echo "Checkout completado. Verificando archivos principales:"
+                sh 'ls -la Jenkinsfile sonar-project.properties index.html || echo "Algunos archivos clave no encontrados"'
+                echo "Contenido de sonar-project.properties:"
+                sh 'cat sonar-project.properties || echo "ERROR: sonar-project.properties no encontrado o no se pudo leer."'
                 echo "=== FIN CHECKOUT ==="
             }
         }
+
+        // Las etapas 'Install Dependencies', 'Build', 'Test' del Jenkinsfile de tu amigo
+        // NO APLICAN a wally-pot porque no es un proyecto Node.js. Las omitimos.
 
         stage('📊 SonarQube Analysis') {
             steps {
                 echo "=== INICIANDO ANALISIS SONARQUBE ==="
                 script {
-                    echo "Verificando configuración de SonarQube..."
-                    echo "SONAR_HOST_URL (desde environment): ${env.SONAR_HOST_URL}"
+                    echo "Configuración para SonarQube:"
+                    echo "SONAR_HOST_URL (definida en environment): ${env.SONAR_HOST_URL}"
+                    // No mostramos el token directamente.
 
-                    echo "Verificando conectividad con SonarQube en ${env.SONAR_HOST_URL}:"
+                    echo "Verificando conectividad con SonarQube en ${env.SONAR_HOST_URL}..."
+                    // Aumentamos el timeout del curl también, por si acaso.
                     sh """
-                        curl -sf --connect-timeout 15 ${env.SONAR_HOST_URL}/api/system/status || echo "⚠ No se puede conectar a SonarQube en ${env.SONAR_HOST_URL}. Verifica que SonarQube esté completamente iniciado y accesible en localhost:9000 desde tu host."
+                        curl -sf --connect-timeout 20 ${env.SONAR_HOST_URL}/api/system/status || echo "⚠ No se puede conectar a SonarQube en ${env.SONAR_HOST_URL}. Verifica la URL, la red, y que SonarQube esté completamente iniciado y respondiendo."
                     """
 
-                    echo "Verificando archivo sonar-project.properties:"
-                    sh 'test -f sonar-project.properties && echo "✅ sonar-project.properties existe." || echo "❌ ERROR: sonar-project.properties no existe."'
-                    sh 'echo "Contenido de sonar-project.properties:"; cat sonar-project.properties || echo "No se pudo leer sonar-project.properties"'
-
                     echo "Obteniendo herramienta SonarQube Scanner..."
-                    def scannerHome = tool 'SonarQube-Scanner' // Nombre de la herramienta en Global Tool Config
+                    // Asegúrate que 'SonarQube-Scanner' es el nombre exacto de la herramienta en Global Tool Configuration
+                    def scannerHome = tool 'SonarQube-Scanner'
                     echo "Scanner Home: ${scannerHome}"
-                    sh "test -f ${scannerHome}/bin/sonar-scanner && echo '✅ Scanner ejecutable encontrado' || echo '❌ Scanner NO encontrado.'"
+                    sh "test -f ${scannerHome}/bin/sonar-scanner && echo '✅ Scanner ejecutable encontrado.' || echo '❌ Scanner ejecutable NO encontrado. Revisa Global Tool Configuration.'"
 
-                    // 'sonarqube' (o el valor de SONAR_TOKEN_CRED_ID) es el ID de la credencial que contiene el token,
-                    // y también el nombre del servidor SonarQube configurado en Jenkins (Manage Jenkins -> Configure System) si los hiciste coincidir.
+                    // 'sonarqube' (o el valor de SONAR_TOKEN_CRED_ID) debe ser:
+                    // 1. El ID de la credencial de Jenkins con el token.
+                    // 2. El nombre del Servidor SonarQube configurado en Jenkins (Manage Jenkins -> Configure System).
+                    //    Asegúrate que la URL de ESE servidor en la config de Jenkins coincida con env.SONAR_HOST_URL.
                     withSonarQubeEnv(env.SONAR_TOKEN_CRED_ID) {
                         echo "Ejecutando análisis de SonarQube..."
-                        echo "SonarQube environment variables inyectadas. SONAR_HOST_URL (para el scanner) debería ser: ${SONAR_HOST_URL}, SONAR_TOKEN debería estar disponible para el scanner."
-
+                        // El scanner leerá projectKey, projectName, sources, ws.timeout, etc., desde sonar-project.properties.
+                        // withSonarQubeEnv debe inyectar SONAR_HOST_URL y SONAR_TOKEN (si la config del servidor en Jenkins está bien).
+                        // Pasamos -Dsonar.host.url explícitamente para asegurar que usa la que definimos.
+                        // El modo -X (debug) es muy útil.
                         sh """
-                            echo "Listando archivos en el directorio actual antes del análisis:"
-                            find . -type f -print | head -30
-
-                            echo "Ejecutando sonar-scanner con modo debug (-X)..."
+                            echo "Listando contenido del workspace antes del análisis (primeros 30 items):"
+                            ls -la | head -n 30
+                            echo "Ejecutando sonar-scanner..."
                             ${scannerHome}/bin/sonar-scanner \
                                 -Dsonar.host.url=${env.SONAR_HOST_URL} \
                                 -Dsonar.verbose=true \
                                 -X
                         """
-                        echo "✅ Comando de análisis de SonarQube ejecutado."
+                        // Nota: No pasamos -Dsonar.login. Si withSonarQubeEnv y la config del server en Jenkins están bien,
+                        // el token se inyecta. Si no, podrías necesitar añadir -Dsonar.login=${TOKEN_DE_LA_CREDENCIAL},
+                        // pero eso puede dar warnings de seguridad si no se hace con cuidado.
+
+                        echo "✅ Comando de análisis de SonarQube lanzado."
                     }
                 }
                 echo "=== FIN ANALISIS SONARQUBE ==="
@@ -83,15 +95,18 @@ pipeline {
         stage('🚪 Quality Gate') {
             steps {
                 echo "=== VERIFICANDO QUALITY GATE ==="
-                timeout(time: 10, unit: 'MINUTES') {
+                // Aumentamos el timeout general para el Quality Gate, ya que el análisis puede tardar.
+                timeout(time: 15, unit: 'MINUTES') {
                     script {
-                        // 'sonarqube' (o el valor de SONAR_TOKEN_CRED_ID) debe ser el nombre de tu servidor SonarQube configurado en Jenkins
+                        echo "Esperando resultado del Quality Gate..."
+                        // El nombre aquí ('sonarqube' o el ID de la credencial) debe coincidir con el servidor configurado en Jenkins.
                         def qg = waitForQualityGate()
                         echo "Quality Gate Status: ${qg.status}"
+
                         if (qg.status != 'OK') {
-                            error "Quality Gate failed: ${qg.status}"
+                            error "Quality Gate FALLÓ: ${qg.status}"
                         } else {
-                            echo "✅ Quality Gate PASÓ exitosamente"
+                            echo "✅ Quality Gate PASÓ exitosamente."
                         }
                     }
                 }
@@ -103,16 +118,23 @@ pipeline {
     post {
         always {
             echo "=== POST-PROCESO SIEMPRE ==="
-            echo "Build Number: ${BUILD_NUMBER}, Build URL: ${BUILD_URL}"
+            echo "Build: ${BUILD_NUMBER}, URL: ${BUILD_URL}, Workspace: ${WORKSPACE}"
+            echo "Limpiando workspace..."
             cleanWs()
-            echo "✅ Workspace limpio"
+            echo "✅ Workspace limpio."
             echo "=== FIN POST-PROCESO ==="
         }
         success {
             echo "🎉 ¡PIPELINE COMPLETADO EXITOSAMENTE!"
         }
         failure {
-            echo "💥 PIPELINE FALLÓ. Revisa los logs detallados (con -X en el scanner)."
+            echo "💥 PIPELINE FALLÓ. Revisa los logs detallados (el scanner se ejecutó con -X)."
+            echo "Verifica:"
+            echo "  1. Conectividad y estado del servidor SonarQube en ${env.SONAR_HOST_URL}."
+            echo "  2. Logs del contenedor SonarQube para errores internos o de recursos."
+            echo "  3. Configuración de la herramienta 'SonarQube-Scanner' en Jenkins."
+            echo "  4. Configuración del servidor SonarQube en Jenkins (URL y token) en 'Administrar Jenkins -> Configurar Sistema'."
+            echo "  5. Contenido de 'sonar-project.properties' en tu repositorio."
         }
     }
 }
