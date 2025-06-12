@@ -9,7 +9,7 @@ pipeline {
 
         // URL de SonarQube. Elige UNA de estas y comenta la otra:
         // Opción 1: Si tienes una red Docker personalizada y SonarQube se llama 'sonarqube' en esa red
-        SONAR_HOST_URL = 'http://kubernetes.docker.internal:9000/jenkins'
+        SONAR_HOST_URL = 'http://kubernetes.docker.internal:9000'
         // Opción 2: Si usas Docker Desktop y SonarQube está en localhost:9000 del host
         // SONAR_HOST_URL = 'http://host.docker.internal:9000'
     }
