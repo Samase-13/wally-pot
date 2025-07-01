@@ -1,11 +1,11 @@
-# Usamos una imagen ligera con Nginx
-FROM nginx:alpine
+# Usar la imagen oficial de Nginx basada en Debian (la versión por defecto)
+FROM nginx
 
-# Elimina la configuración por defecto de Nginx
+# Elimina los archivos de bienvenida por defecto de Nginx
 RUN rm -rf /usr/share/nginx/html/*
 
 # Copia tu sitio al directorio público de Nginx
 COPY . /usr/share/nginx/html
 
-# Exponemos el puerto web
+# Expone el puerto web (buena práctica para documentación)
 EXPOSE 80
