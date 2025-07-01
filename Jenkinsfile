@@ -3,116 +3,118 @@ pipeline {
 
     environment {
         // --- Variables de SonarQube ---
-        SONAR_HOST_URL      = 'http://sonarqube:9000' // Asumiendo que Jenkins y SonarQube están en la misma red Docker
-        SONAR_TOKEN_CRED_ID = 'sonarqube' // El ID de tu credencial de SonarQube en Jenkins
+        SONAR_HOST_URL      = 'http://sonarqube:9000'
+        SONAR_TOKEN_CRED_ID = 'Sonarqube'
 
-        // --- Variables para AWS ECR y Docker ---
-        AWS_REGION          = "us-east-1" // La región de tu repositorio ECR
-        AWS_ACCOUNT_ID      = "533267168206" // Tu ID de cuenta de AWS
-        ECR_REPOSITORY_NAME = "wally-pot" // El nombre de tu repositorio en ECR
-        ECR_URL             = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
-        IMAGE_NAME          = "${ECR_URL}/${ECR_REPOSITORY_NAME}:${env.BUILD_NUMBER}" // Etiqueta única por cada build
-
-        // --- NUEVO: Variables para el Despliegue por SSH ---
-        DEPLOY_SERVER_IP    = "TU_IP_PUBLICA_DEL_SERVIDOR_DE_DESPLIEGUE" // Reemplaza con la IP de tu segundo servidor
-        DEPLOY_SERVER_USER  = "ubuntu" // El usuario para conectar por SSH (ej. 'ubuntu', 'ec2-user')
-        SSH_CREDENTIALS_ID  = "deploy-server-key" // El ID de la credencial SSH que crearás en Jenkins
+        // --- Variables para el Despliegue por SSH ---
+        // ¡REEMPLAZA ESTOS VALORES!
+        DEPLOY_SERVER_IP    = "44.206.239.73"
+        DEPLOY_SERVER_USER  = "ubuntu" // Usuario para conectar por SSH (ej. 'ubuntu', 'ec2-user')
+        SSH_CREDENTIALS_ID  = "jenkins_deploy_key" // El ID de tu credencial SSH en Jenkins
+        
+        // --- Variables del Artefacto y Despliegue ---
+        ARTIFACT_NAME       = "wally-pot-build-${env.BUILD_NUMBER}.zip" // Nombre único para el paquete
+        REMOTE_DEPLOY_PATH  = "/var/www/html" // Directorio raíz de Nginx/Apache en el servidor de despliegue
     }
 
     stages {
         // =================================================================
-        // ETAPA 1: Checkout
+        // ETAPA 1: Checkout (Clonar repositorio)
         // =================================================================
         stage('1. Checkout') {
             steps {
-                echo "Clonando el repositorio..."
+                echo "Clonando el repositorio desde GitHub..."
                 checkout scm
             }
         }
 
         // =================================================================
-        // ETAPA 2: Probar Calidad de Código (Análisis)
+        // ETAPA 2 & 3: Análisis de Calidad y Quality Gate
         // =================================================================
-        stage('2. SonarQube Analysis') {
-            steps {
-                script {
-                    def scannerHome = tool 'SonarQube-Scanner'
-                    withSonarQubeEnv(env.SONAR_TOKEN_CRED_ID) {
-                        sh "${scannerHome}/bin/sonar-scanner"
-                    }
-                }
-            }
-        }
-
-        // =================================================================
-        // ETAPA 3: Recibir Informe (Quality Gate)
-        // =================================================================
-        stage('3. Quality Gate') {
-            steps {
-                timeout(time: 15, unit: 'MINUTES') {
-                    script {
-                        def qg = waitForQualityGate()
-                        if (qg.status != 'OK') {
-                            error "Quality Gate FALLÓ: ${qg.status}. Abortando pipeline."
+        stage('2 & 3. SonarQube Analysis & Quality Gate') {
+            // Se ejecutan en paralelo para ahorrar tiempo
+            parallel {
+                stage('Analysis') {
+                    steps {
+                        script {
+                            def scannerHome = tool 'SonarQube-Scanner'
+                            withSonarQubeEnv(env.SONAR_TOKEN_CRED_ID) {
+                                sh "${scannerHome}/bin/sonar-scanner"
+                            }
                         }
-                        echo "✅ Quality Gate PASÓ exitosamente."
+                    }
+                }
+                stage('Quality Gate') {
+                    steps {
+                        timeout(time: 15, unit: 'MINUTES') {
+                            script {
+                                def qg = waitForQualityGate()
+                                if (qg.status != 'OK') {
+                                    error "Quality Gate FALLÓ: ${qg.status}. Abortando despliegue."
+                                }
+                                echo "✅ Quality Gate PASÓ exitosamente."
+                            }
+                        }
                     }
                 }
             }
         }
 
         // =================================================================
-        // ETAPA 4: Realizar Test (Placeholder)
+        // ETAPA 4 & 5: Tests y Construcción
+        // (Para un sitio estático, "construir" es empaquetar los archivos)
         // =================================================================
-        stage('4. Unit Tests') {
+        stage('4 & 5. Test & Build') {
             steps {
-                // Para un proyecto estático como wally-pot, no hay tests unitarios.
-                // Si fuera un proyecto Java (mvn test) o Node.js (npm test), aquí irían los comandos.
-                echo "Saltando tests unitarios (no aplicable para este proyecto)."
+                echo "Saltando tests (no aplicable para este proyecto)."
+                echo "Empaquetando el sitio web en: ${env.ARTIFACT_NAME}"
+                // El comando 'zip' crea un archivo comprimido con todo el contenido del workspace
+                sh "zip -r ${env.ARTIFACT_NAME} ."
             }
         }
 
         // =================================================================
-        // ETAPA 5 & 6: Construir, Empaquetar y Transferir
-        // (Construir imagen Docker y subirla a ECR)
+        // ETAPA 6: Transferir al Servidor de Despliegue
         // =================================================================
-        stage('5 & 6. Build & Push Docker Image') {
+        stage('6. Transfer Artifact') {
             steps {
-                echo "Construyendo y empaquetando la imagen: ${env.IMAGE_NAME}"
-                sh "aws ecr get-login-password --region ${env.AWS_REGION} | docker login --username AWS --password-stdin ${env.ECR_URL}"
-                sh "docker build -t ${env.IMAGE_NAME} ."
-                echo "Transfiriendo la imagen al registro ECR..."
-                sh "docker push ${env.IMAGE_NAME}"
-            }
-        }
-
-        // =================================================================
-        // ETAPA 7: Inicializar Despliegue (vía SSH)
-        // =================================================================
-        stage('7. Deploy to Production Server') {
-            steps {
-                echo "Conectando al servidor de despliegue ${env.DEPLOY_SERVER_IP} por SSH..."
-                // sshagent se encarga de usar la credencial SSH de forma segura
+                echo "Transfiriendo ${env.ARTIFACT_NAME} al servidor ${env.DEPLOY_SERVER_IP} vía SCP..."
+                // sshagent gestiona la autenticación con la clave privada de forma segura
                 sshagent (credentials: [env.SSH_CREDENTIALS_ID]) {
-                    // El -o StrictHostKeyChecking=no evita la pregunta interactiva de si confiamos en el host
+                    // Usamos scp para copiar el .zip al directorio /tmp/ del servidor remoto.
+                    // Es una buena práctica usar /tmp/ para archivos temporales.
+                    sh "scp -o StrictHostKeyChecking=no ${env.ARTIFACT_NAME} ${env.DEPLOY_SERVER_USER}@${env.DEPLOY_SERVER_IP}:/tmp/"
+                }
+            }
+        }
+
+        // =================================================================
+        // ETAPA 7: Inicializar Despliegue
+        // =================================================================
+        stage('7. Deploy Website') {
+            steps {
+                echo "Desplegando el sitio web en el servidor remoto..."
+                sshagent (credentials: [env.SSH_CREDENTIALS_ID]) {
+                    // Nos conectamos por SSH para ejecutar los comandos de despliegue en el servidor remoto
                     sh """
                         ssh -o StrictHostKeyChecking=no ${env.DEPLOY_SERVER_USER}@${env.DEPLOY_SERVER_IP} '
                             echo "--- Conectado al servidor de despliegue ---"
                             
-                            echo "1. Autenticando Docker con AWS ECR..."
-                            aws ecr get-login-password --region ${env.AWS_REGION} | docker login --username AWS --password-stdin ${env.ECR_URL}
+                            echo "1. Limpiando el contenido antiguo del sitio web..."
+                            sudo rm -rf ${env.REMOTE_DEPLOY_PATH}/*
                             
-                            echo "2. Descargando la nueva imagen: ${env.IMAGE_NAME}"
-                            docker pull ${env.IMAGE_NAME}
+                            echo "2. Descomprimiendo el nuevo sitio web en su lugar..."
+                            # Descomprime el .zip desde /tmp/ directamente en la carpeta del servidor web
+                            sudo unzip -o /tmp/${env.ARTIFACT_NAME} -d ${env.REMOTE_DEPLOY_PATH}
                             
-                            echo "3. Deteniendo y eliminando el contenedor antiguo (si existe)..."
-                            docker stop wally-pot-app || true
-                            docker rm wally-pot-app || true
+                            echo "3. Limpiando el archivo .zip transferido..."
+                            rm /tmp/${env.ARTIFACT_NAME}
                             
-                            echo "4. Lanzando el nuevo contenedor..."
-                            docker run -d --name wally-pot-app -p 80:80 ${env.IMAGE_NAME}
+                            echo "4. Verificando los permisos de los archivos..."
+                            # Asegura que el usuario del servidor web (ej. www-data) pueda leer los archivos
+                            sudo chown -R www-data:www-data ${env.REMOTE_DEPLOY_PATH}
                             
-                            echo "✅ ¡Despliegue completado!"
+                            echo "✅ ¡Despliegue del sitio web completado!"
                         '
                     """
                 }
@@ -122,8 +124,9 @@ pipeline {
 
     post {
         always {
+            // Esta sección se ejecuta siempre, falle o no el pipeline
             echo "Limpiando el workspace de Jenkins..."
-            cleanWs()
+            cleanWs() // Borra los archivos del workspace para mantener limpio el servidor de Jenkins
         }
     }
 }
