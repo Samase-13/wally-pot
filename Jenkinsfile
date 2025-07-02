@@ -31,31 +31,35 @@ pipeline {
         // =================================================================
         // ETAPA 2 & 3: Análisis de Calidad y Quality Gate
         // =================================================================
-        stage('2 & 3. SonarQube Analysis & Quality Gate') {
-            // Se ejecutan en paralelo para ahorrar tiempo
-            parallel {
-                stage('Analysis') {
-                    steps {
-                        script {
-                            def scannerHome = tool 'SonarQube-Scanner'
-                            withSonarQubeEnv(env.SONAR_TOKEN_CRED_ID) {
-                                sh "${scannerHome}/bin/sonar-scanner"
-                            }
-                        }
+                // =================================================================
+        // ETAPA 2: Probar Calidad de Código (Análisis)
+        // =================================================================
+        stage('2. SonarQube Analysis') {
+            steps {
+                script {
+                    // Llama a la herramienta que acabamos de configurar
+                    def scannerHome = tool 'SonarQube-Scanner'
+                    // withSonarQubeEnv usa las credenciales y la URL del servidor SonarQube configurado en Jenkins
+                    withSonarQubeEnv(env.SONAR_TOKEN_CRED_ID) {
+                        sh "${scannerHome}/bin/sonar-scanner"
                     }
                 }
-                stage('Quality Gate') {
-                    steps {
-                        timeout(time: 15, unit: 'MINUTES') {
-                            script {
-                                def qg = waitForQualityGate()
-                                if (qg.status != 'OK') {
-                                    error "Quality Gate FALLÓ: ${qg.status}. Abortando despliegue."
-                                }
-                                echo "✅ Quality Gate PASÓ exitosamente."
-                            }
-                        }
+            }
+        }
+
+        // =================================================================
+        // ETAPA 3: Recibir Informe (Quality Gate)
+        // =================================================================
+        stage('3. Quality Gate') {
+            steps {
+                // Esta etapa ahora espera a que el análisis anterior termine
+                timeout(time: 15, unit: 'MINUTES') {
+                    // El Quality Gate usa la información del análisis que se acaba de completar
+                    def qg = waitForQualityGate()
+                    if (qg.status != 'OK') {
+                        error "Quality Gate FALLÓ: ${qg.status}. Abortando pipeline."
                     }
+                    echo "✅ Quality Gate PASÓ exitosamente."
                 }
             }
         }
