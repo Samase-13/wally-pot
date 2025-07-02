@@ -50,16 +50,18 @@ pipeline {
         // =================================================================
         // ETAPA 3: Recibir Informe (Quality Gate)
         // =================================================================
-        stage('3. Quality Gate') {
+                stage('3. Quality Gate') {
             steps {
-                // Esta etapa ahora espera a que el análisis anterior termine
                 timeout(time: 15, unit: 'MINUTES') {
-                    // El Quality Gate usa la información del análisis que se acaba de completar
-                    def qg = waitForQualityGate()
-                    if (qg.status != 'OK') {
-                        error "Quality Gate FALLÓ: ${qg.status}. Abortando pipeline."
+                    // ¡CORRECTO! Envolvemos todo en un bloque 'script'
+                    script {
+                        def qg = waitForQualityGate(server: 'SonarQube-Server') // Usando el nombre del servidor
+                        if (qg.status != 'OK') {
+                            error "Quality Gate FALLÓ: ${qg.status}. Abortando pipeline."
+                        } else {
+                            echo "✅ Quality Gate PASÓ exitosamente."
+                        }
                     }
-                    echo "✅ Quality Gate PASÓ exitosamente."
                 }
             }
         }
