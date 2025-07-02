@@ -84,37 +84,44 @@ pipeline {
         // =================================================================
         // ETAPA 5. Despliegue y Configuración de Nginx
         // =================================================================
-        stage('5. Deploy & Configure Nginx') {
+       stage('5. Deploy & Configure Nginx') {
             steps {
                 echo "Desplegando el sitio web y configurando Nginx en el servidor remoto..."
                 sshagent (credentials: [env.SSH_CREDENTIALS_ID]) {
                     sh """
                         ssh -o StrictHostKeyChecking=no ${env.DEPLOY_SERVER_USER}@${env.DEPLOY_SERVER_IP} '
+                            set -e  # Hace que el script falle inmediatamente si un comando falla
+
                             echo "--- 1. Preparando directorio de despliegue ---"
                             sudo mkdir -p ${env.REMOTE_DEPLOY_PATH}
                             
                             echo "--- 2. Descomprimiendo nuevo sitio web ---"
-                            # Descomprime el artefacto en el directorio, sobrescribiendo todo
                             sudo unzip -o /tmp/${env.ARTIFACT_NAME} -d ${env.REMOTE_DEPLOY_PATH}
                             
                             echo "--- 3. Configurando Nginx ---"
-                            # Mueve el archivo de configuración al lugar correcto
-                            sudo mv ${env.REMOTE_DEPLOY_PATH}/nginx/${env.SITE_NAME}.conf ${env.NGINX_SITES_AVAILABLE}/${env.SITE_NAME}
+                            CONFIG_SOURCE_PATH="${env.REMOTE_DEPLOY_PATH}/nginx/${env.SITE_NAME}.conf"
+                            CONFIG_DEST_PATH="${env.NGINX_SITES_AVAILABLE}/${env.SITE_NAME}"
+                            
+                            # !! NUEVA COMPROBACIÓN DE SEGURIDAD !!
+                            # Verifica que el archivo de configuración existe antes de moverlo.
+                            if [ ! -f "\${CONFIG_SOURCE_PATH}" ]; then
+                                echo "ERROR: El archivo de configuración Nginx no se encontró en \${CONFIG_SOURCE_PATH}!"
+                                echo "Asegúrate de que el archivo nginx/wally-pot.conf está en tu repositorio Git."
+                                exit 1
+                            fi
+                            
+                            echo "Archivo de configuración encontrado. Moviendo a \${CONFIG_DEST_PATH}"
+                            sudo mv "\${CONFIG_SOURCE_PATH}" "\${CONFIG_DEST_PATH}"
                             
                             echo "--- 4. Creando enlace simbólico ---"
-                            # Elimina el enlace por defecto para evitar conflictos
                             sudo rm -f ${env.NGINX_SITES_ENABLED}/default
-                            # Crea el nuevo enlace simbólico, forzando la sobreescritura si ya existía
-                            sudo ln -sf ${env.NGINX_SITES_AVAILABLE}/${env.SITE_NAME} ${env.NGINX_SITES_ENABLED}/${env.SITE_NAME}
+                            sudo ln -sf "\${CONFIG_DEST_PATH}" "${env.NGINX_SITES_ENABLED}/${env.SITE_NAME}"
                             
                             echo "--- 5. Ajustando permisos de los archivos web ---"
                             sudo chown -R www-data:www-data ${env.REMOTE_DEPLOY_PATH}
-                            sudo chmod -R 755 ${env.REMOTE_DEPLOY_PATH}
                             
                             echo "--- 6. Validando y recargando Nginx ---"
-                            # Prueba que la sintaxis de la configuración es correcta antes de recargar
                             sudo nginx -t
-                            # Recarga Nginx para aplicar la nueva configuración sin downtime
                             sudo systemctl reload nginx
                             
                             echo "--- 7. Limpiando artefacto temporal ---"
