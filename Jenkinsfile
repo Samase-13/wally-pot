@@ -8,7 +8,7 @@ pipeline {
 
         // --- Variables para el Despliegue por SSH ---
         // ¡REEMPLAZA ESTOS VALORES!
-        DEPLOY_SERVER_IP    = "3.83.29.116"
+        DEPLOY_SERVER_IP    = "52.23.8.246"
         DEPLOY_SERVER_USER  = "ubuntu"
         SSH_CREDENTIALS_ID  = "jenkins_deploy_key"
         
