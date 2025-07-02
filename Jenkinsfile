@@ -1,13 +1,18 @@
 pipeline {
+    // Definimos el agente y las herramientas que necesita
     agent any
+    
+    tools {
+        // Asegura que Node.js esté disponible en el PATH
+        // El nombre 'NodeJS-18' debe coincidir con el que configuraste en Global Tool Configuration
+        nodejs 'NodeJS-18' 
+    }
 
     environment {
-        // --- Variable para SonarQube ---
-        // Apunta al NOMBRE de la configuración del servidor que creaste en Jenkins
+        // --- Variables para SonarQube ---
         SONAR_SERVER_NAME = 'SonarQube-Server' 
 
         // --- Variables para el Despliegue por SSH ---
-        // ¡REEMPLAZA ESTOS VALORES!
         DEPLOY_SERVER_IP    = "52.23.8.246"
         DEPLOY_SERVER_USER  = "ubuntu"
         SSH_CREDENTIALS_ID  = "jenkins_deploy_key"
@@ -18,6 +23,17 @@ pipeline {
     }
 
     stages {
+        // =================================================================
+        // ETAPA PREPARATORIA: Instalar dependencias
+        // =================================================================
+        stage('0. Install Dependencies') {
+            steps {
+                echo "Instalando dependencias necesarias (zip)..."
+                // Comando para sistemas basados en Debian/Ubuntu (como el contenedor de Jenkins por defecto)
+                sh 'apt-get update && apt-get install -y zip'
+            }
+        }
+
         // =================================================================
         // ETAPA 1: Checkout (Clonar repositorio)
         // =================================================================
@@ -34,8 +50,8 @@ pipeline {
         stage('2. SonarQube Analysis') {
             steps {
                 script {
+                    // Node.js ya está en el PATH gracias a la sección 'tools'
                     def scannerHome = tool 'SonarQube-Scanner'
-                    // ¡CORRECCIÓN! Usamos el nombre del servidor, no el ID de la credencial.
                     withSonarQubeEnv(SONAR_SERVER_NAME) {
                         sh "${scannerHome}/bin/sonar-scanner"
                     }
@@ -43,38 +59,25 @@ pipeline {
             }
         }
 
+        // ETAPA 3: Quality Gate (COMENTADA PARA NO ESPERAR)
         /*
-
-        // =================================================================
-        // ETAPA 3: Quality Gate
-        // =================================================================
-        stage('3. Quality Gate') {
-            steps {
-                timeout(time: 15, unit: 'MINUTES') {
-                    script {
-                        // Correcto, ya usaba el nombre del servidor.
-                        def qg = waitForQualityGate(server: SONAR_SERVER_NAME)
-                        if (qg.status != 'OK') {
-                            error "Quality Gate FALLÓ: ${qg.status}. Abortando pipeline."
-                        } else {
-                            echo "✅ Quality Gate PASÓ exitosamente."
-                        }
-                    }
-                }
-            }
-        }
+        stage('3. Quality Gate') { ... }
         */
-
-        // ... (resto de las etapas son correctas) ...
         
+        // =================================================================
+        // ETAPA 4 & 5. Test & Build
+        // =================================================================
         stage('4 & 5. Test & Build') {
             steps {
                 echo "Saltando tests (no aplicable para este proyecto)."
                 echo "Empaquetando el sitio web en: ${env.ARTIFACT_NAME}"
+                // Este comando ahora funcionará porque instalamos 'zip'
                 sh "zip -r ${env.ARTIFACT_NAME} ."
             }
         }
 
+        // ... (el resto de las etapas no necesitan cambios) ...
+        
         stage('6. Transfer Artifact') {
             steps {
                 echo "Transfiriendo ${env.ARTIFACT_NAME} al servidor ${env.DEPLOY_SERVER_IP} vía SCP..."
