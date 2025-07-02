@@ -122,7 +122,7 @@ pipeline {
                             
                             echo "--- 6. Validando y recargando Nginx ---"
                             sudo nginx -t
-                            sudo systemctl reload nginx
+                            sudo systemctl restart nginx
                             
                             echo "--- 7. Limpiando artefacto temporal ---"
                             rm /tmp/${env.ARTIFACT_NAME}
