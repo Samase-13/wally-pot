@@ -13,7 +13,7 @@ pipeline {
         SONAR_SERVER_NAME = 'SonarQube-Server' 
 
         // --- Variables para el Despliegue por SSH ---
-        DEPLOY_SERVER_IP    = "52.23.8.246"
+        DEPLOY_SERVER_IP    = "44.202.29.163"
         DEPLOY_SERVER_USER  = "ubuntu"
         SSH_CREDENTIALS_ID  = "jenkins_deploy_key"
         
