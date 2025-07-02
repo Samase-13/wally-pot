@@ -3,8 +3,6 @@ pipeline {
     agent any
     
     tools {
-        // Asegura que Node.js esté disponible en el PATH
-        // El nombre 'NodeJS-18' debe coincidir con el que configuraste en Global Tool Configuration
         nodejs 'NodeJS-18' 
     }
 
@@ -17,9 +15,12 @@ pipeline {
         DEPLOY_SERVER_USER  = "ubuntu"
         SSH_CREDENTIALS_ID  = "jenkins_deploy_key"
         
-        // --- Variables del Artefacto y Despliegue ---
-        ARTIFACT_NAME       = "wally-pot-build-${env.BUILD_NUMBER}.zip"
-        REMOTE_DEPLOY_PATH  = "/var/www/html"
+        // --- Variables del Proyecto y Despliegue ---
+        SITE_NAME           = "wally-pot" // Nombre para directorios y configs
+        ARTIFACT_NAME       = "${SITE_NAME}-build-${env.BUILD_NUMBER}.zip"
+        REMOTE_DEPLOY_PATH  = "/var/www/${SITE_NAME}" // Directorio de despliegue dedicado
+        NGINX_SITES_AVAILABLE = "/etc/nginx/sites-available"
+        NGINX_SITES_ENABLED   = "/etc/nginx/sites-enabled"
     }
 
     stages {
@@ -29,7 +30,6 @@ pipeline {
         stage('0. Install Dependencies') {
             steps {
                 echo "Instalando dependencias necesarias (zip)..."
-                // Comando para sistemas basados en Debian/Ubuntu (como el contenedor de Jenkins por defecto)
                 sh 'apt-get update && apt-get install -y zip'
             }
         }
@@ -50,7 +50,6 @@ pipeline {
         stage('2. SonarQube Analysis') {
             steps {
                 script {
-                    // Node.js ya está en el PATH gracias a la sección 'tools'
                     def scannerHome = tool 'SonarQube-Scanner'
                     withSonarQubeEnv(SONAR_SERVER_NAME) {
                         sh "${scannerHome}/bin/sonar-scanner"
@@ -58,27 +57,22 @@ pipeline {
                 }
             }
         }
-
-        // ETAPA 3: Quality Gate (COMENTADA PARA NO ESPERAR)
-        /*
-        stage('3. Quality Gate') { ... }
-        */
         
         // =================================================================
-        // ETAPA 4 & 5. Test & Build
+        // ETAPA 3. Build (Empaquetar)
         // =================================================================
-        stage('4 & 5. Test & Build') {
+        stage('3. Build') {
             steps {
-                echo "Saltando tests (no aplicable para este proyecto)."
-                echo "Empaquetando el sitio web en: ${env.ARTIFACT_NAME}"
-                // Este comando ahora funcionará porque instalamos 'zip'
+                echo "Empaquetando el sitio web y la configuración de Nginx en: ${env.ARTIFACT_NAME}"
+                // Empaquetamos todo el contenido del proyecto en un zip
                 sh "zip -r ${env.ARTIFACT_NAME} ."
             }
         }
-
-        // ... (el resto de las etapas no necesitan cambios) ...
         
-        stage('6. Transfer Artifact') {
+        // =================================================================
+        // ETAPA 4. Transferir Artefacto
+        // =================================================================
+        stage('4. Transfer Artifact') {
             steps {
                 echo "Transfiriendo ${env.ARTIFACT_NAME} al servidor ${env.DEPLOY_SERVER_IP} vía SCP..."
                 sshagent (credentials: [env.SSH_CREDENTIALS_ID]) {
@@ -87,18 +81,46 @@ pipeline {
             }
         }
 
-        stage('7. Deploy Website') {
+        // =================================================================
+        // ETAPA 5. Despliegue y Configuración de Nginx
+        // =================================================================
+        stage('5. Deploy & Configure Nginx') {
             steps {
-                echo "Desplegando el sitio web en el servidor remoto..."
+                echo "Desplegando el sitio web y configurando Nginx en el servidor remoto..."
                 sshagent (credentials: [env.SSH_CREDENTIALS_ID]) {
                     sh """
                         ssh -o StrictHostKeyChecking=no ${env.DEPLOY_SERVER_USER}@${env.DEPLOY_SERVER_IP} '
-                            echo "--- Conectado al servidor de despliegue ---"
-                            sudo rm -rf ${env.REMOTE_DEPLOY_PATH}/*
+                            echo "--- 1. Preparando directorio de despliegue ---"
+                            sudo mkdir -p ${env.REMOTE_DEPLOY_PATH}
+                            
+                            echo "--- 2. Descomprimiendo nuevo sitio web ---"
+                            # Descomprime el artefacto en el directorio, sobrescribiendo todo
                             sudo unzip -o /tmp/${env.ARTIFACT_NAME} -d ${env.REMOTE_DEPLOY_PATH}
-                            rm /tmp/${env.ARTIFACT_NAME}
+                            
+                            echo "--- 3. Configurando Nginx ---"
+                            # Mueve el archivo de configuración al lugar correcto
+                            sudo mv ${env.REMOTE_DEPLOY_PATH}/nginx/${env.SITE_NAME}.conf ${env.NGINX_SITES_AVAILABLE}/${env.SITE_NAME}
+                            
+                            echo "--- 4. Creando enlace simbólico ---"
+                            # Elimina el enlace por defecto para evitar conflictos
+                            sudo rm -f ${env.NGINX_SITES_ENABLED}/default
+                            # Crea el nuevo enlace simbólico, forzando la sobreescritura si ya existía
+                            sudo ln -sf ${env.NGINX_SITES_AVAILABLE}/${env.SITE_NAME} ${env.NGINX_SITES_ENABLED}/${env.SITE_NAME}
+                            
+                            echo "--- 5. Ajustando permisos de los archivos web ---"
                             sudo chown -R www-data:www-data ${env.REMOTE_DEPLOY_PATH}
-                            echo "✅ ¡Despliegue del sitio web completado!"
+                            sudo chmod -R 755 ${env.REMOTE_DEPLOY_PATH}
+                            
+                            echo "--- 6. Validando y recargando Nginx ---"
+                            # Prueba que la sintaxis de la configuración es correcta antes de recargar
+                            sudo nginx -t
+                            # Recarga Nginx para aplicar la nueva configuración sin downtime
+                            sudo systemctl reload nginx
+                            
+                            echo "--- 7. Limpiando artefacto temporal ---"
+                            rm /tmp/${env.ARTIFACT_NAME}
+                            
+                            echo "✅ ¡Despliegue completado con éxito!"
                         '
                     """
                 }
